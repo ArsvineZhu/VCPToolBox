@@ -130,6 +130,22 @@ class SqliteMetadataStore extends MetadataStore {
         return this.db.prepare('SELECT * FROM files WHERE path = ?').get(path) || null;
     }
 
+    async getDistinctDiaryNames() {
+        const rows = this.db.prepare(
+            'SELECT DISTINCT diary_name FROM files WHERE diary_name != ?'
+        ).all('');
+        return rows.map(r => r.diary_name).filter(Boolean);
+    }
+
+    async getFileByChunkId(chunkId) {
+        return this.db.prepare(`
+            SELECT f.id, f.path, f.diary_name, f.checksum, f.mtime, f.size, f.updated_at
+            FROM chunks c
+            JOIN files f ON c.file_id = f.id
+            WHERE c.id = ?
+        `).get(chunkId) || null;
+    }
+
     async deleteFile(fileId) {
         this.db.prepare('DELETE FROM files WHERE id = ?').run(fileId);
     }
@@ -187,6 +203,18 @@ class SqliteMetadataStore extends MetadataStore {
             content: row.content,
             vector: row.vector || null
         };
+    }
+
+    async getAllChunks() {
+        const rows = this.db.prepare(
+            'SELECT id, file_id, chunk_index, content FROM chunks ORDER BY id'
+        ).all();
+        return rows.map(r => ({
+            id: r.id,
+            fileId: r.file_id,
+            chunkIndex: r.chunk_index,
+            content: r.content
+        }));
     }
 
     // ── Tag CRUD ────────────────────────────────────────────────
@@ -259,6 +287,13 @@ class SqliteMetadataStore extends MetadataStore {
             ORDER BY ft.position
         `).all(fileId);
         return rows.map(r => ({ id: r.id, name: r.name, position: r.position }));
+    }
+
+    async getFileIdsByTagId(tagId) {
+        const rows = this.db.prepare(
+            'SELECT DISTINCT file_id FROM file_tags WHERE tag_id = ?'
+        ).all(tagId);
+        return rows.map(r => r.file_id);
     }
 
     // ── Co-occurrence ───────────────────────────────────────────

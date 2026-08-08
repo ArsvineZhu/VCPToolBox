@@ -27,6 +27,23 @@ class MetadataStore {
   }
 
   /**
+   * Get all distinct diary names of stored files.
+   * @returns {Promise<string[]>}
+   */
+  async getDistinctDiaryNames() {
+    throw new Error('MetadataStore.getDistinctDiaryNames() must be implemented');
+  }
+
+  /**
+   * Get the file row owning a chunk.
+   * @param {number} chunkId
+   * @returns {Promise<object|null>} file row (incl. mtime / updated_at)
+   */
+  async getFileByChunkId(chunkId) {
+    throw new Error('MetadataStore.getFileByChunkId() must be implemented');
+  }
+
+  /**
    * Delete a file and its chunks (cascade).
    * @param {number} fileId
    */
@@ -62,6 +79,14 @@ class MetadataStore {
    */
   async getChunkById(id) {
     throw new Error('MetadataStore.getChunkById() must be implemented');
+  }
+
+  /**
+   * Get every chunk row in the store (corpus access for BM25).
+   * @returns {Promise<Array<{id:number, fileId:number, chunkIndex:number, content:string}>>}
+   */
+  async getAllChunks() {
+    throw new Error('MetadataStore.getAllChunks() must be implemented');
   }
 
   // ── Tag CRUD ──
@@ -108,6 +133,15 @@ class MetadataStore {
    */
   async getFileTags(fileId) {
     throw new Error('MetadataStore.getFileTags() must be implemented');
+  }
+
+  /**
+   * Get ids of all files carrying a tag (tag -> file reverse lookup).
+   * @param {number} tagId
+   * @returns {Promise<number[]>}
+   */
+  async getFileIdsByTagId(tagId) {
+    throw new Error('MetadataStore.getFileIdsByTagId() must be implemented');
   }
 
   // ── Co-occurrence ──

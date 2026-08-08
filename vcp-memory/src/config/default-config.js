@@ -165,7 +165,37 @@ const DEFAULT_CONFIG = {
 
   // ── Memo: RiverMemo ───────────────────────────────────────────────
   riverDecay: 1.0,
-  riverTopologyCap: 0.08
+  riverTopologyCap: 0.08,
+
+  // ── TDB cold-knowledge engine (TDBKnowledge.js mirror) ────────────
+  // Env counterpart mapping:
+  //   TDB_KNOWLEDGE_ENABLED              -> tdbEnabled (default false)
+  //   TDB_KNOWLEDGE_ROOT_PATH            -> tdbRootPath
+  //   TDB_KNOWLEDGE_STORE_PATH           -> tdbStorePath
+  //   TDB_KNOWLEDGE_MODEL                -> tdbModel
+  //   TDB_KNOWLEDGE_DIMENSION            -> tdbDimension
+  //   TDB_KNOWLEDGE_EMBEDDING_BATCH_SIZE -> tdbEmbeddingBatchSize
+  //   TDB_KNOWLEDGE_EXTENSIONS           -> tdbExtensions
+  //   TDB_KNOWLEDGE_EXCLUDE_FOLDERS      -> tdbExcludeFolders
+  //   TDB_KNOWLEDGE_SYNC_MODE            -> tdbSyncMode
+  tdbEnabled: false,
+  tdbRootPath: path.join(process.cwd(), 'knowledge'),
+  tdbStorePath: path.join(process.cwd(), 'VectorStoreTDB'),
+  tdbDbPath: ':memory:',
+  tdbModel: 'google/gemini-embedding-001',
+  tdbDimension: 3072,
+  tdbEmbeddingBatchSize: 16,
+  tdbExtensions: ['.md', '.txt', '.json', '.html'],
+  tdbExcludeFolders: ['TDBdocs'],
+  tdbSyncMode: 'normal',
+  tdbForceQuery: null,
+
+  // TDB search knobs (TDBKnowledge.searchLibrary defaults).
+  tdbHybridAlpha: 0.7,
+  tdbTopK: 10,
+  tdbMinScore: 0.1,
+  tdbExpandDepth: 1,
+  tdbTimeDecayEnabled: false
 };
 
 /**

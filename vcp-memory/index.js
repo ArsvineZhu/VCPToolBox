@@ -16,6 +16,7 @@ const { computeRiverObservability } = require('./src/algorithms/topology/river-o
 // Utility exports
 const { decodeVectorBlob, encodeVectorBlob } = require('./src/utils/vector-codec');
 const { prepareTextForEmbedding, extractTags } = require('./src/utils/text-preprocessor');
+const ResultDeduplicator = require('./src/algorithms/result-deduplicator');
 
 module.exports = {
   // Core
@@ -27,6 +28,7 @@ module.exports = {
   // Algorithms
   EPA,
   ResidualPyramid,
+  ResultDeduplicator,
 
   // Gram-Schmidt primitives
   dotProduct,

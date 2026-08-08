@@ -9,6 +9,9 @@ const { EPA } = require('./src/algorithms/epa');
 const { ResidualPyramid } = require('./src/algorithms/residual-pyramid');
 const { dotProduct, magnitude, normalize, orthogonalize, orthogonalProjection } = require('./src/algorithms/gram-schmidt');
 const { clusterTags, computeWeightedPCA, powerIteration, selectBasisDimension } = require('./src/algorithms/svd');
+const { buildRowOperator, solveDualScaledFields, normalizeSource, effectiveSupport } = require('./src/algorithms/topology/scaled-field-solver');
+const { propagate, computeFirWeights, adjacencyFromEdges } = require('./src/algorithms/wave-propagation');
+const { computeRiverObservability } = require('./src/algorithms/topology/river-observability');
 
 // Utility exports
 const { decodeVectorBlob, encodeVectorBlob } = require('./src/utils/vector-codec');
@@ -37,6 +40,20 @@ module.exports = {
   computeWeightedPCA,
   powerIteration,
   selectBasisDimension,
+
+  // Topology / scaled fields
+  buildRowOperator,
+  solveDualScaledFields,
+  normalizeSource,
+  effectiveSupport,
+
+  // Topology / wave
+  propagate,
+  computeFirWeights,
+  adjacencyFromEdges,
+
+  // Topology / river observability
+  computeRiverObservability,
 
   // Utils
   decodeVectorBlob,

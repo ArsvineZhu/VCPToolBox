@@ -40,6 +40,10 @@ class FileDeleterStage extends Stage {
         ? path.relative(rootPath, info.path)
         : info.path;
     }
+    // Relative paths are stored with forward slashes on every platform.
+    if (typeof relPath === 'string') {
+      relPath = relPath.split(path.sep).join('/');
+    }
     if (typeof relPath !== 'string' || relPath.length === 0) {
       return { ...info, deleted: false };
     }

@@ -8,6 +8,11 @@ const Stage = require('../../core/stage');
  * { chunkIndex, content, vector } entries aligned with the chunk order.
  */
 class ChunkEmbedderStage extends Stage {
+  constructor() {
+    super();
+    this.name = 'chunkEmbedder';
+  }
+
   async process(input, ctx) {
     const fileInfo = input;
     const chunks = Array.isArray(fileInfo && fileInfo.chunks) ? fileInfo.chunks : [];

@@ -10,6 +10,11 @@ const { prepareTextForEmbedding, EMPTY_CONTENT } = require('../../utils/text-pre
  * via prepareTextForEmbedding and empty chunks are dropped.
  */
 class ChunkerStage extends Stage {
+  constructor() {
+    super();
+    this.name = 'chunker';
+  }
+
   async process(input, ctx) {
     const fileInfo = input;
     if (!fileInfo || typeof fileInfo.content !== 'string') {

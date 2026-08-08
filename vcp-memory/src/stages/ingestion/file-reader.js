@@ -20,6 +20,11 @@ const Stage = require('../../core/stage');
  *     when provided the stage skips filesystem reads entirely.
  */
 class FileReaderStage extends Stage {
+  constructor() {
+    super();
+    this.name = 'fileReader';
+  }
+
   async process(input, ctx) {
     if (!input || typeof input.path !== 'string') {
       throw new TypeError('FileReaderStage requires input.path');
@@ -55,11 +60,14 @@ class FileReaderStage extends Stage {
       }
     }
 
-    const relPath = input.relPath ||
+    const relPathRaw = input.relPath ||
       (rootPath
         ? path.relative(rootPath, filePath)
         : path.basename(filePath));
-    const parts = relPath.split(path.sep);
+    // Relative paths are stored with forward slashes on every platform
+    // (mirrors the original knowledge base path convention).
+    const relPath = relPathRaw.split(path.sep).join('/');
+    const parts = relPath.split('/');
     const diaryName = parts.length > 1 ? parts[0] : 'Root';
 
     const checksum = crypto.createHash('md5').update(content).digest('hex');

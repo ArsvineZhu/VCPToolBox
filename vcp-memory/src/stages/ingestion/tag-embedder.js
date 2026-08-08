@@ -8,6 +8,11 @@ const Stage = require('../../core/stage');
  * { name, vector } entries.
  */
 class TagEmbedderStage extends Stage {
+  constructor() {
+    super();
+    this.name = 'tagEmbedder';
+  }
+
   async process(input, ctx) {
     const fileInfo = input;
     const tags = Array.isArray(fileInfo && fileInfo.tags) ? fileInfo.tags : [];

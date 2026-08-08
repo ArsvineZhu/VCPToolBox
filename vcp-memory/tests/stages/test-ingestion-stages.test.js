@@ -58,7 +58,7 @@ test('FileReaderStage reads a temp file and computes checksum', async (t) => {
   const out = await stage.process({ path: filePath }, ctx);
 
   assert.strictEqual(out.path, filePath);
-  assert.strictEqual(out.relPath, path.join('diary1', 'note1.md'));
+  assert.strictEqual(out.relPath, 'diary1/note1.md');
   assert.strictEqual(out.diaryName, 'diary1');
   assert.strictEqual(out.content, content);
   assert.strictEqual(out.checksum, md5(content));
@@ -141,7 +141,7 @@ test('FileReaderStage supports fallbackRead (content provided by caller)', async
   assert.strictEqual(out.mtime, 123456);
   assert.strictEqual(out.size, 15);
   assert.strictEqual(out.checksum, md5('fallback content'));
-  assert.strictEqual(out.relPath, path.join('diary', 'ghost.md'));
+  assert.strictEqual(out.relPath, 'diary/ghost.md');
   assert.strictEqual(out.diaryName, 'diary');
 });
 

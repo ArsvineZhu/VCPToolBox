@@ -9,6 +9,11 @@ const { extractTags } = require('../../utils/text-preprocessor');
  * via config.maxTagsPerFile, mirroring KnowledgeBaseManager._extractTags.
  */
 class TagExtractorStage extends Stage {
+  constructor() {
+    super();
+    this.name = 'tagExtractor';
+  }
+
   async process(input, ctx) {
     const fileInfo = input;
     if (!fileInfo || typeof fileInfo.content !== 'string') {

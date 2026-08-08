@@ -4,6 +4,12 @@ const Pipeline = require('./src/core/pipeline');
 const Stage = require('./src/core/stage');
 const PipelineContext = require('./src/core/context');
 
+// Engine + config loaders (Phase 5.3)
+const { MemoryEngine, createMemoryEngine } = require('./src/engine');
+const { DEFAULT_CONFIG, mergeConfig } = require('./src/config/default-config');
+const { loadRagParams, loadRagParamsSync, RAG_PARAMS_DEFAULTS } = require('./src/config/rag-params-loader');
+const KnowledgeBaseAdapter = require('./src/compat/knowledge-base-adapter');
+
 // Algorithm exports
 const { EPA } = require('./src/algorithms/epa');
 const { ResidualPyramid } = require('./src/algorithms/residual-pyramid');
@@ -23,7 +29,16 @@ module.exports = {
   Pipeline,
   Stage,
   PipelineContext,
-  createMemoryEngine: null, // Phase 5
+
+  // Engine factory + config loaders (Phase 5.3)
+  createMemoryEngine,
+  MemoryEngine,
+  DEFAULT_CONFIG,
+  mergeConfig,
+  loadRagParams,
+  loadRagParamsSync,
+  RAG_PARAMS_DEFAULTS,
+  KnowledgeBaseAdapter,
 
   // Algorithms
   EPA,

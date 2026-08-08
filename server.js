@@ -110,7 +110,18 @@ const tvsManager = require('./modules/tvsManager.js'); // 新增：TVS管理器
 const toolboxManager = require('./modules/toolboxManager.js');
 const dynamicToolRegistry = require('./modules/dynamicToolRegistry.js');
 const messageProcessor = require('./modules/messageProcessor.js');
-const knowledgeBaseManager = require('./KnowledgeBaseManager.js'); // 新增：引入统一知识库管理器
+// ── 知识库管理器：vcp-memory 引擎门控 ─────────────────────────────
+// VCP_MEMORY_ENGINE=on 时使用 vcp-memory 独立库（KnowledgeBaseAdapter）；
+// 默认（off）保持经典 KnowledgeBaseManager 路径，行为完全不变。
+const VCP_MEMORY_ENGINE_ENABLED = (process.env.VCP_MEMORY_ENGINE || 'off').toLowerCase() === 'on';
+let knowledgeBaseManager = null; // 新增：引入统一知识库管理器
+if (VCP_MEMORY_ENGINE_ENABLED) {
+    // 在 dailyNoteRootPath 确定后于下方 gate 区块构建（见 initialize 之前）
+    console.log('[Server] ✅ VCP_MEMORY_ENGINE=on：vcp-memory 引擎接管知识库（经典 KnowledgeBaseManager 未加载）。');
+} else {
+    knowledgeBaseManager = require('./KnowledgeBaseManager.js');
+    console.log('[Server] VCP_MEMORY_ENGINE=off：使用经典 KnowledgeBaseManager（默认路径）。');
+}
 const tdbKnowledgeManager = require('./TDBKnowledge.js'); // 新增：引入 TriviumDB 冷知识库管理器
 const pluginManager = require('./Plugin.js');
 const sarPromptManager = require('./modules/sarPromptManager.js');
@@ -1426,6 +1437,29 @@ const knowledgeRootPath = process.env.TDB_KNOWLEDGE_ROOT_PATH
         ? process.env.TDB_KNOWLEDGE_ROOT_PATH
         : path.resolve(__dirname, process.env.TDB_KNOWLEDGE_ROOT_PATH))
     : path.join(__dirname, 'knowledge');
+
+// ── vcp-memory 引擎构建（仅 VCP_MEMORY_ENGINE=on 生效）───────────
+// 与经典 KnowledgeBaseManager 的配置面保持同源（同组环境变量），
+// 但维护独立的 SQLite 文件（vcp-memory.sqlite），避免与经典库的
+// knowledge_base.sqlite 表结构/恢复逻辑混用。
+if (VCP_MEMORY_ENGINE_ENABLED) {
+    const { createMemoryEngine, KnowledgeBaseAdapter } = require('./vcp-memory');
+    const vectorStorePath = process.env.KNOWLEDGEBASE_STORE_PATH || path.join(__dirname, 'VectorStore');
+    const vcpMemoryEngine = createMemoryEngine({
+        config: {
+            rootPath: dailyNoteRootPath,
+            storePath: vectorStorePath,
+            apiKey: process.env.API_Key,
+            apiUrl: process.env.API_URL,
+            model: process.env.WhitelistEmbeddingModel || 'google/gemini-embedding-001',
+            dimension: parseInt(process.env.VECTORDB_DIMENSION) || 3072
+        },
+        dbPath: process.env.VCP_MEMORY_DB_PATH || path.join(vectorStorePath, 'vcp-memory.sqlite'),
+        ragParamsPath: path.join(__dirname, 'rag_params.json')
+    });
+    knowledgeBaseManager = new KnowledgeBaseAdapter({ engine: vcpMemoryEngine });
+    console.log(`[Server] vcp-memory KnowledgeBaseAdapter 已构建 (dbPath=${vcpMemoryEngine.config.dbPath}, dimension=${vcpMemoryEngine.config.dimension})`);
+}
 
 // Import and use the admin panel routes, passing the getter for currentServerLogPath
 const adminPanelRoutes = require('./routes/adminPanelRoutes')(

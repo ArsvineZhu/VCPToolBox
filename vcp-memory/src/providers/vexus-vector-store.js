@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const fs = require('fs');
 const crypto = require('crypto');
 const VectorStore = require('../interfaces/vector-store');
 
@@ -31,6 +32,7 @@ class VexusVectorStore extends VectorStore {
     this.indexSaveDelay = config.indexSaveDelay || 5000;
     this.tagIndexSaveDelay = config.tagIndexSaveDelay || 10000;
     this.persistTagIndex = config.persistTagIndex || false;
+    this.indexLoadEnabled = config.indexLoadEnabled !== false;
 
     /** @type {Map<string, VexusIndex>} */
     this.indices = new Map();
@@ -51,9 +53,41 @@ class VexusVectorStore extends VectorStore {
       return this.indices.get(indexName);
     }
     const cap = capacity || this.defaultCapacity;
-    const index = new VexusIndex(this.dimension, cap);
+    let index = null;
+    if (this.indexLoadEnabled && this._indexFileExists(indexName)) {
+      try {
+        index = VexusIndex.load(
+          this._getIndexPath(indexName),
+          null,
+          this.dimension,
+          cap
+        );
+      } catch (e) {
+        console.error(
+          `[VexusVectorStore] Failed to load persisted index "${indexName}", ` +
+          `creating fresh one instead: ${e.message}`
+        );
+      }
+    }
+    if (!index) {
+      index = new VexusIndex(this.dimension, cap);
+    }
     this.indices.set(indexName, index);
     return index;
+  }
+
+  /**
+   * Whether a persisted index file exists on disk for the given name.
+   * @param {string} indexName
+   * @returns {boolean}
+   * @private
+   */
+  _indexFileExists(indexName) {
+    try {
+      return fs.existsSync(this._getIndexPath(indexName));
+    } catch (_) {
+      return false;
+    }
   }
 
   /**
@@ -202,9 +236,13 @@ class VexusVectorStore extends VectorStore {
    * Flush all pending saves and clear timers.
    */
   flushPendingSaves() {
-    for (const [name, timer] of this.saveTimers) {
-      clearTimeout(timer);
-      this.saveTimers.delete(name);
+    const toFlush = new Set([...this.saveTimers.keys(), ...this.indices.keys()]);
+    for (const name of toFlush) {
+      const timer = this.saveTimers.get(name);
+      if (timer) {
+        clearTimeout(timer);
+        this.saveTimers.delete(name);
+      }
       const index = this.indices.get(name);
       if (index && typeof index.save === 'function') {
         try {

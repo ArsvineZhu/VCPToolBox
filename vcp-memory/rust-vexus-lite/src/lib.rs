@@ -166,8 +166,12 @@ fn unique_index_sidecar_path(target: &std::path::Path, role: &str) -> std::path:
 }
 
 fn sync_index_file(path: &std::path::Path) -> std::io::Result<()> {
+    // Windows 上 flush/sync（FlushFileBuffers）要求句柄具备写访问权限；
+    // 只读打开会对 fsync 返回 PermissionDenied (os error 5)。这里显式请求
+    // 读写句柄，保证跨平台 fsync 语义一致。
     std::fs::OpenOptions::new()
         .read(true)
+        .write(true)
         .open(path)?
         .sync_all()
 }

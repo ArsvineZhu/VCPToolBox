@@ -63,9 +63,12 @@ class QueryEmbedderStage extends Stage {
     }
 
     // 2. Embed the whole list in a single batch (positions stay aligned).
+    //    DashScope-class providers differentiate query vs document text for
+    //    asymmetric retrieval; document/text defaults remain unchanged for
+    //    providers that ignore the second argument.
     let vectors = null;
     try {
-      vectors = await embeddingProvider.embedBatch(texts);
+      vectors = await embeddingProvider.embedBatch(texts, { textType: 'query' });
     } catch (e) {
       console.warn(`[QueryEmbedder] Embedding failed: ${e.message}`);
     }

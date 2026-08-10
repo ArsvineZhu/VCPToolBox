@@ -38,7 +38,7 @@ const fakeEmbeddingProvider = {
 function newVectorStore(storePath) {
   return new VexusVectorStore({
     dimension: DIM,
-    storePath,
+    storePath: storePath || fs.mkdtempSync(path.join(os.tmpdir(), 'vcp-memory-vec-')),
     tagIndexCapacity: 100,
     indexSaveDelay: 60000,
     tagIndexSaveDelay: 60000
